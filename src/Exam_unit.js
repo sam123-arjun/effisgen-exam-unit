@@ -78,9 +78,9 @@ function ExamUnit() {
         <nav className="eu-topnav">
           <button className="eu-navlink" onClick={() => navigate('/dashboard')}>Dashboard</button>
           <button className="eu-navlink eu-active" onClick={() => navigate('/exam-unit')}>Exams</button>
-          <button className="eu-navlink">Courses</button>
-          <button className="eu-navlink">Invigilators</button>
-          <button className="eu-navlink">Settings</button>
+          <button className="eu-navlink" >Courses</button>
+          <button className="eu-navlink" onClick={() => navigate('/invigilators')}>Invigilators</button>
+          <button className="eu-navlink" onClick={() => navigate('/settings')}>Settings</button>
         </nav>
         <div className="eu-topbar-right">
           <button className="eu-primary" onClick={() => setActiveTab('create')}>New Exam</button>

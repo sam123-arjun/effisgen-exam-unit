@@ -1,10 +1,17 @@
-import React, { useRef } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import ExamUnit from "./Exam_unit";
+import Login from "./Login";
+import TimetableManagement from "./TimetableManagement";
+import StudentManagement from "./StudentManagement";
+import InvigilatorManagement from "./InvigilatorManagement";
+import SettingsPage from "./SettingsPage";
+import CollaborationPage from "./CollaborationPage";
 import { initialExams } from "./data";
+import logo from "./logo.png";
 
-// Timetable page: read-only view of all exams (same data as Exam Unit)
+// Timetable page: read-only view of all exams
 function Timetable() {
   const downloadPdf = () => {
     const headCells = [
@@ -53,7 +60,7 @@ function Timetable() {
   <div class="meta">Generated ${new Date().toLocaleString()}</div>
   <table>
     <thead>
-      <tr>${headCells.map((c)=>`<th>${c}</th>`).join("")}</tr>
+      <tr>${headCells.map((c) => `<th>${c}</th>`).join("")}</tr>
     </thead>
     <tbody>${rowsHtml}</tbody>
   </table>
@@ -70,13 +77,15 @@ function Timetable() {
   };
 
   return (
-    <div className="tt-wrap">
-      <div className="tt-header">
-        <h1 className="tt-title">Timetable</h1>
-        <button className="db-btn" onClick={downloadPdf}>Download PDF</button>
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Timetable</h1>
+        <button className="btn btn-primary" onClick={downloadPdf}>
+          Download PDF
+        </button>
       </div>
-      <div className="tt-table-card">
-        <table className="tt-table">
+      <div className="content-card">
+        <table className="data-table">
           <thead>
             <tr>
               <th>Exam Name</th>
@@ -91,13 +100,13 @@ function Timetable() {
           <tbody>
             {initialExams.map((exam, i) => (
               <tr key={i}>
-                <td className="tt-strong">{exam.examName}</td>
-                <td className="tt-muted">{exam.course}</td>
-                <td className="tt-code">{exam.date}</td>
-                <td className="tt-code">{exam.time}</td>
-                <td className="tt-muted">{exam.duration}</td>
-                <td className="tt-muted">{exam.venue}</td>
-                <td className="tt-muted">{exam.invigilator}</td>
+                <td className="font-semibold">{exam.examName}</td>
+                <td className="text-gray-600">{exam.course}</td>
+                <td className="font-mono">{exam.date}</td>
+                <td className="font-mono">{exam.time}</td>
+                <td className="text-gray-600">{exam.duration}</td>
+                <td className="text-gray-600">{exam.venue}</td>
+                <td className="text-gray-600">{exam.invigilator}</td>
               </tr>
             ))}
           </tbody>
@@ -107,20 +116,10 @@ function Timetable() {
   );
 }
 
-// Dashboard Component (with sidebar + topbar)
+// Dashboard Component
 function Dashboard() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-
-  const menuItems = [
-    { label: "Dashboard", path: "/dashboard", icon: "🏠" },
-    { label: "Exam Unit", path: "/exam-unit", icon: "📄" },
-    { label: "Timetable", path: "/timetable", icon: "🗓️" },
-    { label: "Students", path: "/students", icon: "👥" },
-    { label: "Invigilators", path: "/invigilators", icon: "🧑‍🏫" },
-    { label: "Collaboration", path: "/collaboration", icon: "🤝" },
-    { label: "Settings", path: "/settings", icon: "⚙️" }
-  ];
 
   const handleUploadExcelClick = () => {
     if (fileInputRef.current) fileInputRef.current.click();
@@ -135,93 +134,275 @@ function Dashboard() {
   };
 
   return (
-    <div className="db-layout">
-      <aside className="db-sidebar">
-        <div className="db-brand-row">
-          <div className="db-brand-dot" />
-          <div className="db-logo">EffiESGen</div>
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Dashboard</h1>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-header">
+            <h3 className="stat-title">Upcoming Exams</h3>
+          </div>
+          <div className="stat-value">3</div>
+          <div className="stat-change positive">+10%</div>
         </div>
-        <ul className="db-menu">
-          {menuItems.map((m) => (
-            <li key={m.label} className={m.path === "/dashboard" ? "active" : ""} onClick={() => navigate(m.path)}>
-              <span className="db-menu-icon" aria-hidden>{m.icon}</span>
-              <span>{m.label}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="db-help">Help and Docs</div>
-      </aside>
 
-      <main className="db-main">
-        {/* top bar */}
-        <header className="db-topbar">
-          <div className="db-topbar-right">
-            <div className="db-search">
-              <span className="db-search-icon">🔍</span>
-              <input placeholder="Search" />
-            </div>
-            <button className="db-icon-btn" title="Notifications">🔔</button>
-            <div className="db-avatar">👩</div>
+        <div className="stat-card">
+          <div className="stat-header">
+            <h3 className="stat-title">Total Students</h3>
           </div>
-        </header>
+          <div className="stat-value">1200</div>
+          <div className="stat-change positive">+5%</div>
+        </div>
 
-        {/* content */}
-        <section className="db-content">
-          <h1 className="db-title">Dashboard</h1>
-
-          <div className="db-cards">
-            <div className="db-card">
-              <div className="db-card-title">Upcoming Exams</div>
-              <div className="db-card-value">3</div>
-              <div className="db-card-delta db-up">+10%</div>
-            </div>
-            <div className="db-card">
-              <div className="db-card-title">Total Students</div>
-              <div className="db-card-value">1200</div>
-              <div className="db-card-delta db-up">+5%</div>
-            </div>
-            <div className="db-card">
-              <div className="db-card-title">Total Invigilators</div>
-              <div className="db-card-value">150</div>
-              <div className="db-card-delta db-up">+2%</div>
-            </div>
-            <div className="db-card">
-              <div className="db-card-title">Conflict Alerts</div>
-              <div className="db-card-value">5</div>
-              <div className="db-card-delta db-down">-1%</div>
-            </div>
+        <div className="stat-card">
+          <div className="stat-header">
+            <h3 className="stat-title">Total Invigilators</h3>
           </div>
+          <div className="stat-value">150</div>
+          <div className="stat-change positive">+2%</div>
+        </div>
 
-          <div className="db-section-title">Quick Actions</div>
-          <div className="db-actions">
-            <button className="db-btn-primary" onClick={() => navigate('/exam-unit')}>Create Exam</button>
-            <button className="db-btn" onClick={handleUploadExcelClick}>Upload Excel</button>
-            <button className="db-btn" onClick={() => navigate('/timetable')}>Timetable</button>
-            <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleFileChange} />
+        <div className="stat-card">
+          <div className="stat-header">
+            <h3 className="stat-title">Conflict Alerts</h3>
           </div>
-        </section>
-      </main>
+          <div className="stat-value">5</div>
+          <div className="stat-change negative">-1%</div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="section">
+        <h2 className="section-title">Quick Actions</h2>
+        <div className="action-buttons">
+          <button 
+            className="btn btn-primary" 
+            onClick={() => navigate('/exam-unit')}
+          >
+            Create Exam
+          </button>
+          <button 
+            className="btn btn-secondary" 
+            onClick={handleUploadExcelClick}
+          >
+            Upload Excel
+          </button>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => navigate('/timetable')}
+          >
+            Edit Timetable
+          </button>
+          <input 
+            ref={fileInputRef} 
+            type="file" 
+            accept=".xlsx,.xls,.csv" 
+            style={{ display: 'none' }} 
+            onChange={handleFileChange} 
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
-// Main Layout Component (no sidebar for other pages)
-function MainLayout() {
+// Sidebar Component
+function Sidebar({ onLogout }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const menuItems = [
+    { label: "Dashboard", path: "/dashboard", icon: "🏠" },
+    { label: "Exam Unit", path: "/exam-unit", icon: "📄" },
+    { label: "Timetable", path: "/timetable", icon: "🗓️" },
+    { label: "Students", path: "/students", icon: "👥" },
+    { label: "Invigilators", path: "/invigilators", icon: "🧑‍🏫" },
+    { label: "Collaboration", path: "/collaboration", icon: "🤝" },
+    { label: "Settings", path: "/settings", icon: "⚙️" }
+  ];
+
   return (
-    <div className="app">
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Navigate to="/exam-unit" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/exam-unit" element={<ExamUnit />} />
-          <Route path="/timetable" element={<Timetable />} />
-          <Route path="/students" element={<div><h1>Students</h1><p>This page is under construction.</p></div>} />
-          <Route path="/invigilators" element={<div><h1>Invigilators</h1><p>This page is under construction.</p></div>} />
-          <Route path="/collaboration" element={<div><h1>Collaboration</h1><p>This page is under construction.</p></div>} />
-          <Route path="/settings" element={<div><h1>Settings</h1><p>This page is under construction.</p></div>} />
-        </Routes>
-      </main>
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <div className="brand">
+          <img src={logo} alt="EffiESGen Logo" className="brand-logo" />
+          <span className="brand-name">EffiESGen</span>
+        </div>
+      </div>
+
+      <nav className="sidebar-nav">
+        <ul className="nav-list">
+          {menuItems.map((item) => (
+            <li key={item.path}>
+              <button
+                className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+                onClick={() => navigate(item.path)}
+              >
+                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-label">{item.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div className="sidebar-footer">
+        <button className="help-button">
+          <span className="nav-icon">❓</span>
+          <span className="nav-label">Help and Docs</span>
+        </button>
+        <button className="logout-button" onClick={onLogout}>
+          <span className="nav-icon">🚪</span>
+          <span className="nav-label">Logout</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+// Top Navigation Component
+function TopNavigation() {
+  return (
+    <header className="top-nav">
+      <div className="top-nav-left">
+        <div className="brand-mobile">
+          <span className="brand-icon">♦</span>
+          <span className="brand-text">EffiESGen</span>
+        </div>
+      </div>
+      <div className="top-nav-right">
+        <div className="search-container">
+          <input 
+            type="text" 
+            placeholder="Search" 
+            className="search-input"
+          />
+          <span className="search-icon">🔍</span>
+        </div>
+        <button className="notification-btn">🔔</button>
+        <div className="user-avatar">👩</div>
+      </div>
+    </header>
+  );
+}
+
+// Layout Component with Sidebar
+function DashboardLayout({ children }) {
+  return (
+    <div className="app-layout">
+      <TopNavigation />
+      <div className="main-layout">
+        <Sidebar />
+        <main className="main-content">
+          {children}
+        </main>
+      </div>
     </div>
+  );
+}
+
+// Protected Route Component
+function ProtectedRoute({ children, userType }) {
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+// Main Layout Component
+function MainLayout() {
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem('isAuthenticated') === 'true'
+  );
+  const [userType, setUserType] = useState(
+    localStorage.getItem('userType') || 'Exam Unit'
+  );
+
+  const navigate = useNavigate();
+
+  const handleLogin = (loginData) => {
+    if (loginData.email && loginData.password) {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userType', loginData.userType);
+      localStorage.setItem('userEmail', loginData.email);
+      setIsAuthenticated(true);
+      setUserType(loginData.userType);
+      navigate("/dashboard");
+    }
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login onLogin={handleLogin} />} />
+      
+      {/* Dashboard routes with sidebar layout */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute userType={userType}>
+          <DashboardLayout>
+            <Dashboard />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/exam-unit" element={
+        <ProtectedRoute userType={userType}>
+          
+            <ExamUnit />
+          
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/timetable" element={
+        <ProtectedRoute userType={userType}>
+          
+            <TimetableManagement />
+          
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/students" element={
+        <ProtectedRoute userType={userType}>
+          
+            <StudentManagement />
+          
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/invigilators" element={
+        <ProtectedRoute userType={userType}>
+          
+            <InvigilatorManagement />
+          
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/collaboration" element={
+        <ProtectedRoute userType={userType}>
+          
+            <CollaborationPage />
+          
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/settings" element={
+        <ProtectedRoute userType={userType}>
+          
+            <SettingsPage />
+          
+        </ProtectedRoute>
+      } />
+    </Routes>
   );
 }
 
@@ -232,4 +413,3 @@ export default function App() {
     </Router>
   );
 }
-
